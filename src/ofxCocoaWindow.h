@@ -79,6 +79,5 @@ protected:
 private:
     
     ofCoreEvents coreEvents;
-    shared_ptr<ofBaseRenderer> currentRenderer;
     ofGLWindowSettings settings;
 };

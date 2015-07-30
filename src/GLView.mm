@@ -106,6 +106,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 												   object:self];
 	}
 	
+    NSLog(@"GL context ready");
+    
 	return self;
 }
 

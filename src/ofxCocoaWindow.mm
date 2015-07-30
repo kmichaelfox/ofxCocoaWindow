@@ -47,6 +47,19 @@ void ofxCocoaWindow :: setup( const ofGLWindowSettings & settings )
 
     [ [ NSApplication sharedApplication ] setDelegate : delegate ];
     
+    static bool inited = false;
+    if(!inited){
+        glewExperimental = GL_TRUE;
+        GLenum err = glewInit();
+        if (GLEW_OK != err)
+        {
+            /* Problem: glewInit failed, something is seriously wrong. */
+            ofLogError("ofAppRunner") << "couldn't init GLEW: " << glewGetErrorString(err);
+            return;
+        }
+        inited = true;
+    }
+    
     //ofGLReadyCallback();
 }
 
@@ -63,7 +76,7 @@ ofCoreEvents & ofxCocoaWindow::events(){
 
 //--------------------------------------------
 shared_ptr<ofBaseRenderer> & ofxCocoaWindow::renderer(){
-    return currentRenderer;
+    return delegate->currentRenderer;
 }
 
 //--------------------------------------------
@@ -78,8 +91,11 @@ void ofxCocoaWindow::draw(){
 //--------------------------------------------
 void ofxCocoaWindow::loop(){[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     [NSApp activateIgnoringOtherApps:YES];
-    instance->events().notifySetup();
-    instance->events().notifyUpdate();
+    
+    [[instance->delegate openGLWindow] makeKeyAndOrderFront:nil];
+    
+//    instance->events().notifySetup();
+//    instance->events().notifyUpdate();
     
     
     // This launches the NSapp functions in  MyDelegate
@@ -248,18 +264,18 @@ void ofxCocoaWindow :: setFullscreen(bool fullscreen)
     }
     else if( !fullscreen && [ delegate windowMode ] != OF_WINDOW )
     {
-		[ [ NSApp delegate] goWindow ];
+		[ delegate goWindow ];
     }
 }
 
 //------------------------------------------------------------
 void ofxCocoaWindow :: enableSetupScreen()
 {
-	[ [ NSApp delegate] enableSetupScreen ];
+	[ delegate enableSetupScreen ];
 }
 
 //------------------------------------------------------------
 void ofxCocoaWindow :: disableSetupScreen()
 {
-	[ [ NSApp delegate] disableSetupScreen ];
+	[ delegate disableSetupScreen ];
 }

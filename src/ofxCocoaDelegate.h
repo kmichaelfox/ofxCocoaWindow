@@ -14,8 +14,6 @@
 
 @interface ofxCocoaDelegate : NSObject <GLViewDelegate>
 {
-    NSWindow        *openGLWindow;
-    GLView          *openGLView;
 
 	NSWindow        *fullScreenWindow;
 	GLView          *fullScreenView;
@@ -28,7 +26,12 @@
     float   fps;
     int		nFrameCount;
 	double	lastFrameTime;
-	float	frameRate;
+    float	frameRate;
+    
+@public
+    NSWindow        *openGLWindow;
+    GLView          *openGLView;
+    shared_ptr<ofBaseRenderer> currentRenderer;
 }
 
 @property (retain) NSWindow *openGLWindow;
@@ -37,6 +40,8 @@
 @property (retain) GLView   *fullScreenView;
 @property (assign) ofWindowMode windowMode;
 @property (assign) ofWindowMode windowModeInit;
+
+@property (assign) shared_ptr<ofBaseRenderer> currentRenderer;
 
 @property (assign)   float timeNow;
 @property (assign)   float timeThen;

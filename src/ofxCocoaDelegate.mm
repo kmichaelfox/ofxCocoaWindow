@@ -25,6 +25,7 @@
 @synthesize nFrameCount;
 @synthesize lastFrameTime;
 @synthesize frameRate;
+@synthesize currentRenderer;
 
 - (id) init 
 {
@@ -57,6 +58,8 @@
         [ self.openGLView setDelegate: self ];
 
 		[ self.openGLWindow setContentView : self.openGLView ];
+        
+        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLRenderer( ofGetWindowPtr() ));
 	}
     
 	return self;
@@ -80,12 +83,29 @@
 	[appMenuItem setSubmenu:appMenu];
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)notification 
+- (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
+    NSLog(@"YSSA");
+    
+//    if((settings.glVersionMajor==3 && settings.glVersionMinor>=2) || settings.glVersionMajor>=4){
+//        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//    }
+//    if(settings.glVersionMajor>=3){
+//        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+//        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLProgrammableRenderer(this));
+//    }else{
+//        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLRenderer(this));
+//    }
+
+    
+    
     ofColor c = ofGetBackgroundColor();
 	glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+    
+//    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
 	[ self.openGLWindow cascadeTopLeftFromPoint : NSMakePoint( 20, 20 ) ];
 	[ self.openGLWindow setTitle: [ [ NSProcessInfo processInfo ] processName ] ];
 	[ self.openGLWindow makeKeyAndOrderFront : nil ];
@@ -98,7 +118,6 @@
     frameRate   = 60;
 	nFrameCount = 0;
     
-    ofEvents().notifySetup();
     
     if( self.windowModeInit == OF_WINDOW )
     {
@@ -109,6 +128,14 @@
         [ self.openGLView drawView ];       // must first draw content at least once, otherwise textures are not shared between the two opengl contexts.
         [ self goFullScreenOnAllDisplays ];
     }
+    
+    if(currentRenderer->getType()==ofGLProgrammableRenderer::TYPE){
+        //            static_cast<ofGLProgrammableRenderer*>(currentRenderer.get())->setup(settings.glVersionMajor,settings.glVersionMinor);
+    }else{
+        static_cast<ofGLRenderer*>(currentRenderer.get())->setup();
+    }
+    
+    ofEvents().notifySetup();
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication 
