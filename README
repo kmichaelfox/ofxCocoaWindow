@@ -1,3 +1,6 @@
+**Note**
+* Work-in-progess setup for OF 0.9.0. Currently working, but not tested!
+
 >>> FEATURES
 1) Supports fullscreen across multiple displays.
 2) Uses display link for vertical sync rendering.
