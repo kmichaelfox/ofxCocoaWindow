@@ -28,6 +28,7 @@
 	double	lastFrameTime;
     float	frameRate;
     
+@public
     NSWindow        *openGLWindow;
     GLView          *openGLView;
 }
@@ -49,6 +50,14 @@
 - (id)initWithWidth : (int)width 
              height : (int)height 
          windowMode : (ofWindowMode)windowMode;
+
+- (id)initWithWidth : (int)width
+             height : (int)height
+         windowMode : (ofWindowMode)windowMode
+         level      : (NSInteger) level
+         style      : (int) styleMask
+         isOpaque   : (BOOL) opaque
+         hasShadow  : (BOOL) shadow;
 
 - (void) goFullScreenOnAllDisplays;
 - (void) goFullScreenOnDisplay : (int)displayIndex;

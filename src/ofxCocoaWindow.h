@@ -13,8 +13,85 @@
 #include "ofMain.h"
 #include "ofAppBaseWindow.h"
 #include "ofxCocoaDelegate.h"
+#include "GLView.h"
 
 class ofBaseApp;
+
+class ofxCocoaWindowSettings : public ofGLWindowSettings {
+public:
+    
+    bool        isOpaque;
+    bool        hasWindowShadow;
+    NSInteger   windowLevel;
+    NSUInteger  styleMask;
+    
+    ofxCocoaWindowSettings():
+    isOpaque(true)
+    ,hasWindowShadow(true)
+    ,windowLevel(NSNormalWindowLevel)
+    ,styleMask(NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask){
+        
+    }
+    
+    ofxCocoaWindowSettings(const ofGLWindowSettings & settings)
+    :ofGLWindowSettings(settings)
+    ,isOpaque(true)
+    ,hasWindowShadow(true)
+    ,windowLevel(NSNormalWindowLevel)
+    ,styleMask(NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask){
+    }
+    
+//    See below!
+//    ofGLWindowSettings()
+//    :numSamples(4)
+//    ,doubleBuffering(true)
+//    ,redBits(8)
+//    ,greenBits(8)
+//    ,blueBits(8)
+//    ,alphaBits(8)
+//    ,depthBits(24)
+//    ,stencilBits(0)
+//    ,stereo(false)
+//    ,visible(true)
+//    ,iconified(false)
+//    ,decorated(true)
+//    ,resizable(true)
+//    ,monitor(0){}
+    
+//    ofGLWindowSettings(const ofGLWindowSettings & settings)
+//    :ofGLWindowSettings(settings)
+//    ,numSamples(4)
+//    ,doubleBuffering(true)
+//    ,redBits(8)
+//    ,greenBits(8)
+//    ,blueBits(8)
+//    ,alphaBits(8)
+//    ,depthBits(24)
+//    ,stencilBits(0)
+//    ,stereo(false)
+//    ,visible(true)
+//    ,iconified(false)
+//    ,decorated(true)
+//    ,resizable(true)
+//    ,monitor(0){}
+    
+// From GLFW window, should be supported someday
+//    int numSamples;
+//    bool doubleBuffering;
+//    int redBits;
+//    int greenBits;
+//    int blueBits;
+//    int alphaBits;
+//    int depthBits;
+//    int stencilBits;
+//    bool stereo;
+//    bool visible;
+//    bool iconified;
+//    bool decorated;
+//    bool resizable;
+//    int monitor;
+//    shared_ptr<ofAppBaseWindow> shareContextWith;
+};
 
 class ofxCocoaWindow : public ofAppBaseGLWindow
 {
@@ -22,16 +99,15 @@ public:
 	 ofxCocoaWindow();
 	~ofxCocoaWindow();
 
-    
     static void loop();
     static bool doesLoop(){ return true; }
     static bool allowsMultiWindow(){ return true; }
     static bool needsPolling(){ return false; }
     static void pollEvents(){ }
     
+    void setup(const ofxCocoaWindowSettings & settings);
 	void setup(const ofGLWindowSettings & settings);
 	void initializeWindow();
-//	void runAppViaInfiniteLoop(ofBaseApp * appPtr);
     
     void update();
     void draw();
@@ -70,6 +146,11 @@ public:
 	void		enableSetupScreen();
 	void		disableSetupScreen();
 	
+    // special ofxCocoaWindow stuff
+    ofxCocoaDelegate * getDelegate();
+    GLView           * getGlView();
+    NSWindow         * getNSWindow();
+    
 protected:
 	ofOrientation       orientation;
 	ofBaseApp           *ofAppPtr;
@@ -83,5 +164,5 @@ private:
     
     ofCoreEvents coreEvents;
     shared_ptr<ofBaseRenderer> currentRenderer;
-    ofGLWindowSettings settings;
+    ofxCocoaWindowSettings settings;
 };

@@ -74,10 +74,11 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     NSOpenGLPixelFormatAttribute attribs[] =
     {
 		kCGLPFAAccelerated,
-		kCGLPFANoRecovery,
-		kCGLPFADoubleBuffer,
-		kCGLPFAColorSize, 24,
-		kCGLPFADepthSize, 16,
+        kCGLPFADoubleBuffer,
+        NSOpenGLPFADepthSize, 24,
+        NSOpenGLPFAAlphaSize, 8,
+        NSOpenGLPFAColorSize, 32,
+        kCGLPFANoRecovery,
 		0
     };
 	
@@ -105,8 +106,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 													 name:NSViewGlobalFrameDidChangeNotification
 												   object:self];
 	}
-	
-    NSLog(@"GL context ready");
     
 	return self;
 }
@@ -171,19 +170,21 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	// Make sure we draw to the right context
 	[[self openGLContext] makeCurrentContext];
 	
+    ofEvents().notifyUpdate();
+    
     ofGetCurrentRenderer()->startRender();
     
     if( bEnableSetupScreen )
         ofSetupScreen();
     
-	if( ofbClearBg() )
+	if( ofGetBackgroundAuto() )
     {
         ofColor c = ofGetBackgroundColor();
         glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        cout << c << endl;
 	}
     
-    ofEvents().notifyUpdate();
     ofEvents().notifyDraw();
     
 	[[self openGLContext] flushBuffer]; 

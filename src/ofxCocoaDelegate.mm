@@ -37,6 +37,18 @@
               height : (int)height 
           windowMode : (ofWindowMode)mode;
 {
+    return [ self initWithWidth:width height:height windowMode:mode level:NSNormalWindowLevel style:NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask | NSMiniaturizableWindowMask isOpaque:YES hasShadow:YES];
+}
+
+- (id)initWithWidth : (int)width
+             height : (int)height
+         windowMode : (ofWindowMode)mode
+         level      : (NSInteger) levelMask
+         style      : (int) styleMask
+         isOpaque   : (BOOL) opaque
+         hasShadow  : (BOOL) shadow
+
+{
 	if( self = [super init] )
     {
         self.windowMode         = OF_WINDOW;        // by default set to window.
@@ -46,15 +58,30 @@
 
 		// This is where the nibless window happens
 		self.openGLWindow = [ [ NSWindow alloc ] initWithContentRect : contentSize 
-                                                           styleMask : NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask
-                                                             backing : NSBackingStoreBuffered 
-                                                               defer : NO ];
+                                                           styleMask : (int) styleMask
+                                                             backing : NSBackingStoreBuffered
+                                                               defer : YES ];
 		
-		[ self.openGLWindow setLevel : NSNormalWindowLevel ];
+        [ self.openGLWindow setLevel : levelMask ];
+        
+        if ( !opaque ){
+            [self.openGLWindow setBackgroundColor:[NSColor clearColor]];
+        } else {
+            [self.openGLWindow setBackgroundColor:[NSColor blackColor]];
+        }
+        
+        [ self.openGLWindow setHasShadow:shadow ];
+        
+        [ self.openGLWindow setOpaque: opaque ];
+        [ self.openGLWindow setMovableByWindowBackground:NO];
 		
 		self.openGLView = [ [ GLView alloc ] initWithFrame : contentSize 
                                               shareContext : nil ];
         [ self.openGLView setDelegate: self ];
+        
+        
+        GLint i = opaque;
+        [[self.openGLView openGLContext] setValues:&i forParameter:NSOpenGLCPSurfaceOpacity];
 
 		[ self.openGLWindow setContentView : self.openGLView ];
 	}
@@ -82,12 +109,11 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-    ofColor c = ofGetBackgroundColor();
-	glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ofEvents().notifySetup();
     
-//    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    ofColor c = ofGetBackgroundColor();
+    glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
 	[ self.openGLWindow cascadeTopLeftFromPoint : NSMakePoint( 20, 20 ) ];
 	[ self.openGLWindow setTitle: [ [ NSProcessInfo processInfo ] processName ] ];
@@ -111,8 +137,6 @@
         [ self.openGLView drawView ];       // must first draw content at least once, otherwise textures are not shared between the two opengl contexts.
         [ self goFullScreenOnAllDisplays ];
     }
-    
-    ofEvents().notifySetup();
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication 

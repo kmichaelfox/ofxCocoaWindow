@@ -22,6 +22,7 @@ ofxCocoaWindow :: ofxCocoaWindow()
 	orientation	= OF_ORIENTATION_DEFAULT; // for now this goes here.
     instance = this;
     bEnableSetupScreen	= true;
+    delegate = NULL;
 }
 
 ofxCocoaWindow :: ~ofxCocoaWindow ()
@@ -30,7 +31,17 @@ ofxCocoaWindow :: ~ofxCocoaWindow ()
 }
 
 //------------------------------------------------------------
-void ofxCocoaWindow :: setup( const ofGLWindowSettings & _settings )
+void ofxCocoaWindow :: setup( const ofGLWindowSettings & _settings ){
+    const ofxCocoaWindowSettings * glSettings = dynamic_cast<const ofxCocoaWindowSettings*>(&settings);
+    if(glSettings){
+        setup(*glSettings);
+    }else{
+        setup(ofxCocoaWindowSettings(settings));
+    }
+}
+
+//------------------------------------------------------------
+void ofxCocoaWindow :: setup( const ofxCocoaWindowSettings & _settings )
 {
     settings = _settings;
     if( settings.windowMode == OF_GAME_MODE )
@@ -44,8 +55,12 @@ void ofxCocoaWindow :: setup( const ofGLWindowSettings & _settings )
     
     // this creates the Window and OpenGLView in the MyDelegate initialization
     delegate = [ [ [ ofxCocoaDelegate alloc ] initWithWidth : settings.width
-                                                     height : settings.width
-                                                 windowMode : settings.windowMode ] autorelease ];
+                                                     height : settings.height
+                                                 windowMode : settings.windowMode
+                                                      level : settings.windowLevel
+                                                      style : settings.styleMask
+                                                   isOpaque : settings.isOpaque
+                                                   hasShadow: settings.hasWindowShadow ] autorelease];
 
     [ [ NSApplication sharedApplication ] setDelegate : delegate ];
     
@@ -104,28 +119,7 @@ void ofxCocoaWindow::update(){
 
 //--------------------------------------------
 void ofxCocoaWindow::draw(){
-    cout << "YAS"<<endl;
-    currentRenderer->startRender();
-    if( bEnableSetupScreen ) currentRenderer->setupScreen();
-    
-    events().notifyDraw();
-    
-    if (currentRenderer->getBackgroundAuto() == false){
-        // in accum mode resizing a window is BAD, so we clear on resize events.
-//        if (nFramesSinceWindowResized < 3){
-//            currentRenderer->clear();
-//        }
-    }
-//    if(settings.doubleBuffering){
-//        // hm
-////        glfwSwapBuffers(windowP);
-//    } else{
-        glFlush();
-//    }
-    
-    currentRenderer->finishRender();
-    
-//    nFramesSinceWindowResized++;
+    // this all happens, for better or for worse, GLView::drawView
 }
 
 //--------------------------------------------
@@ -326,4 +320,19 @@ void ofxCocoaWindow :: disableSetupScreen()
 {
     [ delegate disableSetupScreen ];
     bEnableSetupScreen = false;
+}
+
+//------------------------------------------------------------
+ofxCocoaDelegate * ofxCocoaWindow :: getDelegate(){
+    return delegate;
+}
+
+//------------------------------------------------------------
+GLView * ofxCocoaWindow::getGlView(){
+    return [delegate openGLView];
+}
+
+//------------------------------------------------------------
+NSWindow * ofxCocoaWindow::getNSWindow(){
+    return [delegate openGLWindow];
 }
