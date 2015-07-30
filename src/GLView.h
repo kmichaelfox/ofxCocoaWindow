@@ -18,7 +18,7 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/CVDisplayLink.h>
 
-@protocol GLViewDelegate <NSObject>
+@protocol GLViewDelegate <NSObject, NSApplicationDelegate>
 @required
 - (void) glViewUpdate;
 @end

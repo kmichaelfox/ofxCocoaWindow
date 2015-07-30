@@ -11,7 +11,7 @@ void ofApp::setup()
     ofSetWindowPosition( 100, 100 );
 //    ofSetWindowShape( 1024, 768 );
     
-    image.loadImage( "transparency.png" );
+    image.load( "transparency.png" );
     imagePos.set( 0, 100 );
     
     bShowCursor = true;
@@ -22,7 +22,7 @@ void ofApp::setup()
 void ofApp::update()
 {
 	imagePos.x += 1;
-    if( imagePos.x > ofGetWidth() - image.width )
+    if( imagePos.x > ofGetWidth() - image.getWidth() )
         imagePos.x = 0;
 }
 

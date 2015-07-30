@@ -149,9 +149,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	[[self openGLContext] makeCurrentContext];
 	
     ofSetupScreen();
-        
-    float * bgPtr = ofBgColorPtr();
-    glClearColor(bgPtr[0],bgPtr[1],bgPtr[2], bgPtr[3]);
+    
+    ofColor c = ofGetBackgroundColor();
+    glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
 	[[self openGLContext] flushBuffer]; 
@@ -174,13 +174,13 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     
 	if( ofbClearBg() )
     {
-		float * bgPtr = ofBgColorPtr();
-		glClearColor(bgPtr[0],bgPtr[1],bgPtr[2], bgPtr[3]);
+        ofColor c = ofGetBackgroundColor();
+        glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
     
-    ofNotifyUpdate();
-    ofNotifyDraw();
+    ofEvents().notifyUpdate();
+    ofEvents().notifyDraw();
     
 	[[self openGLContext] flushBuffer]; 
 	
@@ -251,7 +251,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
             key = OF_KEY_LEFT;
         }
         
-		ofNotifyKeyPressed( key );
+		ofEvents().notifyKeyPressed( key );
 	}
 }
 
@@ -261,7 +261,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	NSString *characters = [theEvent characters];
 	if ([characters length]) {
 		unichar key = [characters characterAtIndex:0];
-		ofNotifyKeyReleased(key);
+		ofEvents().notifyKeyReleased(key);
 	}
 }
 
@@ -274,61 +274,61 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 //------------------------------------------------------------
 -(void)mouseDown:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMousePressed(p.x, p.y, 0);
+	ofEvents().notifyMousePressed(p.x, p.y, 0);
 }
 
 //------------------------------------------------------------
 -(void)rightMouseDown:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMousePressed(p.x, p.y, 2);
+	ofEvents().notifyMousePressed(p.x, p.y, 2);
 }
 
 //------------------------------------------------------------
 -(void)otherMouseDown:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMousePressed(p.x, p.y, 1);
+	ofEvents().notifyMousePressed(p.x, p.y, 1);
 }
 
 //------------------------------------------------------------
 -(void)mouseMoved:(NSEvent *)theEvent{
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMouseMoved(p.x, p.y);
+	ofEvents().notifyMouseMoved(p.x, p.y);
 }
 
 //------------------------------------------------------------
 -(void)mouseUp:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMouseReleased(p.x, p.y, 0);
+	ofEvents().notifyMouseReleased(p.x, p.y, 0);
 }
 
 //------------------------------------------------------------
 -(void)rightMouseUp:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMouseReleased(p.x, p.y, 2);
+	ofEvents().notifyMouseReleased(p.x, p.y, 2);
 }
 
 //------------------------------------------------------------
 -(void)otherMouseUp:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMouseReleased(p.x, p.y, 1);
+	ofEvents().notifyMouseReleased(p.x, p.y, 1);
 }
 
 //------------------------------------------------------------
 -(void)mouseDragged:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMouseDragged(p.x, p.y, 0);
+	ofEvents().notifyMouseDragged(p.x, p.y, 0);
 }
 
 //------------------------------------------------------------
 -(void)rightMouseDragged:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMouseDragged(p.x, p.y, 2);
+	ofEvents().notifyMouseDragged(p.x, p.y, 2);
 }
 
 //------------------------------------------------------------
 -(void)otherMouseDragged:(NSEvent *)theEvent {
 	ofPoint p = [self ofPointFromEvent:theEvent];
-	ofNotifyMouseDragged(p.x, p.y, 1);
+	ofEvents().notifyMouseDragged(p.x, p.y, 1);
 }
 
 //------------------------------------------------------------

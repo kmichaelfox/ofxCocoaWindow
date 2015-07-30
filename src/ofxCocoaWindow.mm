@@ -12,12 +12,15 @@
 
 #import <AppKit/AppKit.h>
 
-void ofGLReadyCallback();
+//void ofGLReadyCallback();
+
+static ofxCocoaWindow * instance;
 
 //------------------------------------------------------------
 ofxCocoaWindow :: ofxCocoaWindow()
 {
 	orientation	= OF_ORIENTATION_DEFAULT; // for now this goes here.
+    instance = this;
 }
 
 ofxCocoaWindow :: ~ofxCocoaWindow ()
@@ -26,25 +29,25 @@ ofxCocoaWindow :: ~ofxCocoaWindow ()
 }
 
 //------------------------------------------------------------
-void ofxCocoaWindow :: setupOpenGL( int w, int h, int screenMode ) 
+void ofxCocoaWindow :: setup( const ofGLWindowSettings & settings )
 {
-    if( screenMode == OF_GAME_MODE )
+    if( settings.windowMode == OF_GAME_MODE )
     {
         cout << "OF_GAME_MODE not supported in ofxCocoaWindow. Please use OF_WINDOW or OF_FULLSCREEN" << endl;
         return;
     }
     
     pool = [ NSAutoreleasePool new ];
-    [ NSApplication sharedApplication ];
+//    [ NSApplication sharedApplication ];
     
     // this creates the Window and OpenGLView in the MyDelegate initialization
-    delegate = [ [ [ ofxCocoaDelegate alloc ] initWithWidth : w
-                                                     height : h
-                                                 windowMode : (ofWindowMode)screenMode ] autorelease ];
+    delegate = [ [ [ ofxCocoaDelegate alloc ] initWithWidth : settings.width
+                                                     height : settings.width
+                                                 windowMode : settings.windowMode ] autorelease ];
 
-    [ NSApp setDelegate : delegate ];
+    [ [ NSApplication sharedApplication ] setDelegate : delegate ];
     
-    ofGLReadyCallback();
+    //ofGLReadyCallback();
 }
 
 //------------------------------------------------------------
@@ -53,38 +56,54 @@ void ofxCocoaWindow :: initializeWindow ()
 	// no callbacks needed.
 }
 
-//------------------------------------------------------------
-void ofxCocoaWindow :: runAppViaInfiniteLoop ( ofBaseApp * appPtr ) 
-{
-	ofAppPtr = appPtr;
-	
-	ofGetAppPtr()->mouseX = 0;
-	ofGetAppPtr()->mouseY = 0;
-	
-	[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-	[NSApp activateIgnoringOtherApps:YES];
-	// This launches the NSapp functions in  MyDelegate
-  	[NSApp run]; 
-	
-	[pool drain];
+//--------------------------------------------
+ofCoreEvents & ofxCocoaWindow::events(){
+    return coreEvents;
+}
+
+//--------------------------------------------
+shared_ptr<ofBaseRenderer> & ofxCocoaWindow::renderer(){
+    return currentRenderer;
+}
+
+//--------------------------------------------
+void ofxCocoaWindow::update(){
+    events().notifyUpdate();
+}
+
+//--------------------------------------------
+void ofxCocoaWindow::draw(){
+}
+
+//--------------------------------------------
+void ofxCocoaWindow::loop(){[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    [NSApp activateIgnoringOtherApps:YES];
+    instance->events().notifySetup();
+    instance->events().notifyUpdate();
+    
+    
+    // This launches the NSapp functions in  MyDelegate
+    [NSApp run];
+    
+    [instance->pool drain];
 }
 
 //------------------------------------------------------------
 float ofxCocoaWindow :: getFrameRate()
 {
-	return [ [ NSApp delegate ] getFrameRate ];
+	return [ delegate getFrameRate ];
 }
 
 //------------------------------------------------------------
 double ofxCocoaWindow :: getLastFrameTime()
 {
-	return [ [ NSApp delegate ] getLastFrameTime ];
+	return [ delegate getLastFrameTime ];
 }
 
 //------------------------------------------------------------
 int ofxCocoaWindow :: getFrameNum()
 {
-	return [ [ NSApp delegate ] getFrameNum ];
+	return [ delegate getFrameNum ];
 }
 
 //------------------------------------------------------------
@@ -102,16 +121,16 @@ ofPoint ofxCocoaWindow :: getWindowSize()
 //------------------------------------------------------------
 ofPoint ofxCocoaWindow :: getWindowPosition()
 {
-	NSRect viewFrame    = [ [ NSApp delegate ] getViewFrame ];
-	NSRect windowFrame  = [ [ NSApp delegate ] getWindowFrame ];
-	NSRect screenRect   = [ [ NSApp delegate ] getScreenFrame ];
+	NSRect viewFrame    = [ delegate getViewFrame ];
+	NSRect windowFrame  = [ delegate getWindowFrame ];
+	NSRect screenRect   = [ delegate getScreenFrame ];
 	return ofPoint( windowFrame.origin.x, screenRect.size.height-windowFrame.origin.y-viewFrame.size.height, 0 );
 }
 
 //------------------------------------------------------------
 ofPoint ofxCocoaWindow :: getScreenSize()
 {
-	NSRect screenRect = [ [ NSApp delegate ] getScreenFrame ];
+	NSRect screenRect = [ delegate getScreenFrame ];
 	return ofPoint( screenRect.size.width, screenRect.size.height, 0 );
 }
 
@@ -119,16 +138,16 @@ ofPoint ofxCocoaWindow :: getScreenSize()
 int ofxCocoaWindow :: getWidth()
 {
 	if( orientation == OF_ORIENTATION_DEFAULT || orientation == OF_ORIENTATION_180 )
-		return [ [ NSApp delegate ] getViewFrame ].size.width;
-	return [ [ NSApp delegate ] getViewFrame ].size.height;
+		return [ delegate getViewFrame ].size.width;
+	return [ delegate getViewFrame ].size.height;
 }
 
 //------------------------------------------------------------
 int ofxCocoaWindow :: getHeight()
 {
 	if( orientation == OF_ORIENTATION_DEFAULT || orientation == OF_ORIENTATION_180 )
-		return [ [ NSApp delegate ] getViewFrame ].size.height;
-	return [ [ NSApp delegate ] getViewFrame ].size.width;
+		return [ delegate getViewFrame ].size.height;
+	return [ delegate getViewFrame ].size.width;
 }
 
 //------------------------------------------------------------
@@ -146,25 +165,25 @@ ofOrientation ofxCocoaWindow :: getOrientation()
 //------------------------------------------------------------
 void ofxCocoaWindow :: setWindowPosition( int x, int y ) 
 {
-    if( [ [ NSApp delegate ] windowMode ] == OF_FULLSCREEN )
+    if( [ delegate windowMode ] == OF_FULLSCREEN )
         return; // only do this in OF_WINDOW mode.
     
-	NSRect viewFrame  = [ [ NSApp delegate ] getViewFrame ];
-	NSRect screenRect = [ [ NSApp delegate ] getScreenFrame ];
+	NSRect viewFrame  = [ delegate getViewFrame ];
+	NSRect screenRect = [ delegate getScreenFrame ];
 	
 	NSPoint position = NSMakePoint( x, screenRect.size.height - viewFrame.size.height - y );
-    [ [ NSApp delegate ] setWindowPosition : position ];
+    [ delegate setWindowPosition : position ];
 }
 
 //------------------------------------------------------------
 void ofxCocoaWindow :: setWindowShape( int w, int h )
 {
-    if( [ [ NSApp delegate ] windowMode ] == OF_FULLSCREEN )
+    if( [ delegate windowMode ] == OF_FULLSCREEN )
         return; // only do this in OF_WINDOW mode.
     
-    NSRect windowFrame  = [ [ NSApp delegate ] getWindowFrame ];
-	NSRect viewFrame    = [ [ NSApp delegate ] getViewFrame ];
-	NSRect screenRect   = [ [ NSApp delegate ] getScreenFrame ];
+    NSRect windowFrame  = [ delegate getWindowFrame ];
+	NSRect viewFrame    = [ delegate getViewFrame ];
+	NSRect screenRect   = [ delegate getScreenFrame ];
     
     int x, y, g;
     x = windowFrame.origin.x;
@@ -174,7 +193,7 @@ void ofxCocoaWindow :: setWindowShape( int w, int h )
     resizedWindowFrame.origin = NSMakePoint( x, screenRect.size.height - h - y );
 	resizedWindowFrame.size   = NSMakeSize( w, h );
 	
-	[ [ NSApp delegate ] setWindowShape : resizedWindowFrame ];
+	[ delegate setWindowShape : resizedWindowFrame ];
 }
 
 //------------------------------------------------------------
@@ -196,38 +215,38 @@ void ofxCocoaWindow :: setFrameRate ( float targetRate )
 }
 
 //------------------------------------------------------------
-int ofxCocoaWindow :: getWindowMode()
+ofWindowMode ofxCocoaWindow :: getWindowMode()
 {
-	return [ [ NSApp delegate ] windowMode ];
+	return [ delegate windowMode ];
 }
 
 //------------------------------------------------------------
 void ofxCocoaWindow :: toggleFullscreen() 
 {
-	if( [ [ NSApp delegate ] windowMode ] == OF_GAME_MODE )
+	if( [ delegate windowMode ] == OF_GAME_MODE )
         return;
 	
-	if( [ [ NSApp delegate ] windowMode ] == OF_WINDOW )
+	if( [ delegate windowMode ] == OF_WINDOW )
     {
-		[ [ NSApp delegate ] goFullScreenOnAllDisplays ];
+		[ delegate goFullScreenOnAllDisplays ];
     }
-    else if( [ [ NSApp delegate ] windowMode ] == OF_FULLSCREEN )
+    else if( [ delegate windowMode ] == OF_FULLSCREEN )
     {
-		[ [ NSApp delegate ] goWindow ];
+		[ delegate goWindow ];
     }
 }
 
 //------------------------------------------------------------
 void ofxCocoaWindow :: setFullscreen(bool fullscreen)
 {
-	if( [ [ NSApp delegate ] windowMode ] == OF_GAME_MODE )
+	if( [ delegate windowMode ] == OF_GAME_MODE )
         return;
 	
-    if( fullscreen && [ [ NSApp delegate ] windowMode ] != OF_FULLSCREEN )
+    if( fullscreen && [ delegate windowMode ] != OF_FULLSCREEN )
     {
-		[ [ NSApp delegate ] goFullScreenOnAllDisplays ];
+		[ delegate goFullScreenOnAllDisplays ];
     }
-    else if( !fullscreen && [ [ NSApp delegate ] windowMode ] != OF_WINDOW )
+    else if( !fullscreen && [ delegate windowMode ] != OF_WINDOW )
     {
 		[ [ NSApp delegate] goWindow ];
     }

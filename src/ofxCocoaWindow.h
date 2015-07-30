@@ -16,16 +16,29 @@
 
 class ofBaseApp;
 
-class ofxCocoaWindow : public ofAppBaseWindow
+class ofxCocoaWindow : public ofAppBaseGLWindow
 {
 public:
 	 ofxCocoaWindow();
 	~ofxCocoaWindow();
 
-	void setupOpenGL(int w, int h, int screenMode);
+    
+    static void loop();
+    static bool doesLoop(){ return true; }
+    static bool allowsMultiWindow(){ return true; }
+    static bool needsPolling(){ return true; }
+    static void pollEvents(){ }
+    
+	void setup(const ofGLWindowSettings & settings);
 	void initializeWindow();
-	void runAppViaInfiniteLoop(ofBaseApp * appPtr);
-
+//	void runAppViaInfiniteLoop(ofBaseApp * appPtr);
+    
+    void update();
+    void draw();
+    
+    ofCoreEvents & events();
+    shared_ptr<ofBaseRenderer> & renderer();
+    
 	void hideCursor();
 	void showCursor();
 
@@ -46,7 +59,7 @@ public:
 	int			getWidth();
 	int			getHeight();	
 
-	int			getWindowMode();
+	ofWindowMode    getWindowMode();
 
 	int			getFrameNum();
 	float		getFrameRate();
@@ -62,4 +75,10 @@ protected:
 	
 	ofxCocoaDelegate    *delegate;
 	NSAutoreleasePool   *pool; //not sure if needed
+    
+private:
+    
+    ofCoreEvents coreEvents;
+    shared_ptr<ofBaseRenderer> currentRenderer;
+    ofGLWindowSettings settings;
 };

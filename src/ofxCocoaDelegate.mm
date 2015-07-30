@@ -82,7 +82,8 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification 
 {
-	glClearColor(ofBgColorPtr()[0], ofBgColorPtr()[1], ofBgColorPtr()[2], ofBgColorPtr()[3]);
+    ofColor c = ofGetBackgroundColor();
+	glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	[ self.openGLWindow cascadeTopLeftFromPoint : NSMakePoint( 20, 20 ) ];
@@ -97,7 +98,7 @@
     frameRate   = 60;
 	nFrameCount = 0;
     
-    ofNotifySetup();
+    ofEvents().notifySetup();
     
     if( self.windowModeInit == OF_WINDOW )
     {
