@@ -12,6 +12,12 @@
 
 #import "GLView.h"
 
+
+@interface OpenGLWindow : NSWindow
+{
+}
+@end
+
 @interface ofxCocoaDelegate : NSObject <GLViewDelegate>
 {
 
@@ -29,11 +35,11 @@
     float	frameRate;
     
 @public
-    NSWindow        *openGLWindow;
+    OpenGLWindow    *openGLWindow;
     GLView          *openGLView;
 }
 
-@property (retain) NSWindow *openGLWindow;
+@property (retain) OpenGLWindow *openGLWindow;
 @property (retain) GLView   *openGLView;
 @property (retain) NSWindow *fullScreenWindow;
 @property (retain) GLView   *fullScreenView;

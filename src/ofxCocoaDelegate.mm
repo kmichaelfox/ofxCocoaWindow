@@ -10,6 +10,15 @@
 
 #import "ofxCocoaDelegate.h"
 
+@implementation OpenGLWindow
+
+- (BOOL) canBecomeKeyWindow
+{
+    return YES;
+}
+
+@end
+
 @implementation ofxCocoaDelegate
 
 @synthesize openGLWindow;
@@ -57,7 +66,7 @@
 		NSRect contentSize = NSMakeRect( 0.0f, 0.0f, width, height );
 
 		// This is where the nibless window happens
-		self.openGLWindow = [ [ NSWindow alloc ] initWithContentRect : contentSize 
+		self.openGLWindow = [ [ OpenGLWindow alloc ] initWithContentRect : contentSize
                                                            styleMask : (int) styleMask
                                                              backing : NSBackingStoreBuffered
                                                                defer : YES ];
@@ -259,7 +268,7 @@
     
 	[ self.openGLView stopAnimation ];
 	
-	self.fullScreenWindow = [ [ NSWindow alloc ] initWithContentRect : displayRect 
+	self.fullScreenWindow = [ [ NSWindow alloc ] initWithContentRect : displayRect
                                                            styleMask : NSBorderlessWindowMask 
                                                              backing : NSBackingStoreBuffered 
                                                                defer : YES ];

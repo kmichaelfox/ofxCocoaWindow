@@ -229,6 +229,27 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 
 #pragma mark Events
 //------------------------------------------------------------
+-(void)flagsChanged:(NSEvent *)theEvent {
+    NSEventModifierFlags flags = [theEvent modifierFlags];
+    
+    if( flags & NSCommandKeyMask ){
+        ofEvents().notifyKeyPressed(OF_KEY_SUPER);
+    } else if( flags & NSShiftKeyMask ){
+        ofEvents().notifyKeyPressed(OF_KEY_SHIFT);
+    } else if( flags & NSControlKeyMask ){
+        ofEvents().notifyKeyPressed(OF_KEY_CONTROL);
+    }   else if( flags & NSAlternateKeyMask ){
+        ofEvents().notifyKeyPressed(OF_KEY_ALT);
+    }
+    //    } else if( flags & NSNumericPadKeyMask ){
+    //        ofNotifyKeyPressed(OF_KEY_SUPER);
+    //    } else if( flags & NSHelpKeyMask ){
+    //        ofNotifyKeyPressed(OF_KEY_SUPER);
+    //    } else if( flags & NSFunctionKeyMask ){
+    //        ofNotifyKeyPressed(OF_KEY_);
+    //    }
+}
+
 -(void)keyDown:(NSEvent *)theEvent 
 {
 	NSString *characters = [ theEvent characters ];

@@ -126,10 +126,6 @@ void ofxCocoaWindow::draw(){
 void ofxCocoaWindow::loop(){
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     [NSApp activateIgnoringOtherApps:YES];
-//    
-//    instance->events().notifySetup();
-//    instance->events().notifyUpdate();
-    
     
     // This launches the NSapp functions in  MyDelegate
     [NSApp run];
@@ -137,11 +133,10 @@ void ofxCocoaWindow::loop(){
     [instance->pool drain];
 }
 
+//------------------------------------------------------------
 void ofxCocoaWindow::close(){
     events().notifyExit();
     events().disable();
-    
-    
 }
 
 //------------------------------------------------------------
