@@ -171,6 +171,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	// Make sure we draw to the right context
 	[[self openGLContext] makeCurrentContext];
 	
+    ofGetCurrentRenderer()->startRender();
+    
     if( bEnableSetupScreen )
         ofSetupScreen();
     
@@ -187,6 +189,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	[[self openGLContext] flushBuffer]; 
 	
 	CGLUnlockContext((CGLContextObj)[[self openGLContext] CGLContextObj]);
+    
+    ofGetCurrentRenderer()->finishRender();
 }
  
 - (BOOL) acceptsFirstResponder

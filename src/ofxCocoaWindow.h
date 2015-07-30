@@ -26,7 +26,7 @@ public:
     static void loop();
     static bool doesLoop(){ return true; }
     static bool allowsMultiWindow(){ return true; }
-    static bool needsPolling(){ return true; }
+    static bool needsPolling(){ return false; }
     static void pollEvents(){ }
     
 	void setup(const ofGLWindowSettings & settings);
@@ -35,6 +35,7 @@ public:
     
     void update();
     void draw();
+    void close();
     
     ofCoreEvents & events();
     shared_ptr<ofBaseRenderer> & renderer();
@@ -78,6 +79,9 @@ protected:
     
 private:
     
+    bool			bEnableSetupScreen;
+    
     ofCoreEvents coreEvents;
+    shared_ptr<ofBaseRenderer> currentRenderer;
     ofGLWindowSettings settings;
 };

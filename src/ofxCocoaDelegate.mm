@@ -25,7 +25,6 @@
 @synthesize nFrameCount;
 @synthesize lastFrameTime;
 @synthesize frameRate;
-@synthesize currentRenderer;
 
 - (id) init 
 {
@@ -58,8 +57,6 @@
         [ self.openGLView setDelegate: self ];
 
 		[ self.openGLWindow setContentView : self.openGLView ];
-        
-        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLRenderer( ofGetWindowPtr() ));
 	}
     
 	return self;
@@ -85,20 +82,6 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-    NSLog(@"YSSA");
-    
-//    if((settings.glVersionMajor==3 && settings.glVersionMinor>=2) || settings.glVersionMajor>=4){
-//        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-//    }
-//    if(settings.glVersionMajor>=3){
-//        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-//        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLProgrammableRenderer(this));
-//    }else{
-//        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLRenderer(this));
-//    }
-
-    
-    
     ofColor c = ofGetBackgroundColor();
 	glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -129,12 +112,6 @@
         [ self goFullScreenOnAllDisplays ];
     }
     
-    if(currentRenderer->getType()==ofGLProgrammableRenderer::TYPE){
-        //            static_cast<ofGLProgrammableRenderer*>(currentRenderer.get())->setup(settings.glVersionMajor,settings.glVersionMinor);
-    }else{
-        static_cast<ofGLRenderer*>(currentRenderer.get())->setup();
-    }
-    
     ofEvents().notifySetup();
 }
 
@@ -143,11 +120,12 @@
 	return YES;
 }
 
-- (BOOL)applicationShouldTerminate:(NSNotification*)n 
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSNotification*)n 
 {
     if( self.windowMode == OF_FULLSCREEN )
         [ self.fullScreenView stopAnimation ];
     [ self.openGLView stopAnimation ];
+    return NSTerminateNow;
 }
 
 - (void)dealloc 
@@ -331,6 +309,7 @@
 
 - (void) glViewUpdate
 {
+    
 	timeNow = ofGetElapsedTimef();  //--- fps calculation:
 	double diff = timeNow - timeThen;
 	if( diff  > 0.00001 )

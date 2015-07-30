@@ -21,6 +21,7 @@ ofxCocoaWindow :: ofxCocoaWindow()
 {
 	orientation	= OF_ORIENTATION_DEFAULT; // for now this goes here.
     instance = this;
+    bEnableSetupScreen	= true;
 }
 
 ofxCocoaWindow :: ~ofxCocoaWindow ()
@@ -29,8 +30,9 @@ ofxCocoaWindow :: ~ofxCocoaWindow ()
 }
 
 //------------------------------------------------------------
-void ofxCocoaWindow :: setup( const ofGLWindowSettings & settings )
+void ofxCocoaWindow :: setup( const ofGLWindowSettings & _settings )
 {
+    settings = _settings;
     if( settings.windowMode == OF_GAME_MODE )
     {
         cout << "OF_GAME_MODE not supported in ofxCocoaWindow. Please use OF_WINDOW or OF_FULLSCREEN" << endl;
@@ -47,6 +49,16 @@ void ofxCocoaWindow :: setup( const ofGLWindowSettings & settings )
 
     [ [ NSApplication sharedApplication ] setDelegate : delegate ];
     
+    if((settings.glVersionMajor==3 && settings.glVersionMinor>=2) || settings.glVersionMajor>=4){
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    }
+    if(settings.glVersionMajor>=3){
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLProgrammableRenderer(this));
+    }else{
+        currentRenderer = shared_ptr<ofBaseRenderer>(new ofGLRenderer(this));
+    }
+    
     static bool inited = false;
     if(!inited){
         glewExperimental = GL_TRUE;
@@ -58,6 +70,12 @@ void ofxCocoaWindow :: setup( const ofGLWindowSettings & settings )
             return;
         }
         inited = true;
+    }
+    
+    if(currentRenderer->getType()==ofGLProgrammableRenderer::TYPE){
+        static_cast<ofGLProgrammableRenderer*>(currentRenderer.get())->setup(settings.glVersionMajor,settings.glVersionMinor);
+    }else{
+        static_cast<ofGLRenderer*>(currentRenderer.get())->setup();
     }
     
     //ofGLReadyCallback();
@@ -76,7 +94,7 @@ ofCoreEvents & ofxCocoaWindow::events(){
 
 //--------------------------------------------
 shared_ptr<ofBaseRenderer> & ofxCocoaWindow::renderer(){
-    return delegate->currentRenderer;
+    return currentRenderer;
 }
 
 //--------------------------------------------
@@ -86,14 +104,35 @@ void ofxCocoaWindow::update(){
 
 //--------------------------------------------
 void ofxCocoaWindow::draw(){
+    cout << "YAS"<<endl;
+    currentRenderer->startRender();
+    if( bEnableSetupScreen ) currentRenderer->setupScreen();
+    
+    events().notifyDraw();
+    
+    if (currentRenderer->getBackgroundAuto() == false){
+        // in accum mode resizing a window is BAD, so we clear on resize events.
+//        if (nFramesSinceWindowResized < 3){
+//            currentRenderer->clear();
+//        }
+    }
+//    if(settings.doubleBuffering){
+//        // hm
+////        glfwSwapBuffers(windowP);
+//    } else{
+        glFlush();
+//    }
+    
+    currentRenderer->finishRender();
+    
+//    nFramesSinceWindowResized++;
 }
 
 //--------------------------------------------
-void ofxCocoaWindow::loop(){[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+void ofxCocoaWindow::loop(){
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     [NSApp activateIgnoringOtherApps:YES];
-    
-    [[instance->delegate openGLWindow] makeKeyAndOrderFront:nil];
-    
+//    
 //    instance->events().notifySetup();
 //    instance->events().notifyUpdate();
     
@@ -102,6 +141,13 @@ void ofxCocoaWindow::loop(){[NSApp setActivationPolicy:NSApplicationActivationPo
     [NSApp run];
     
     [instance->pool drain];
+}
+
+void ofxCocoaWindow::close(){
+    events().notifyExit();
+    events().disable();
+    
+    
 }
 
 //------------------------------------------------------------
@@ -272,10 +318,12 @@ void ofxCocoaWindow :: setFullscreen(bool fullscreen)
 void ofxCocoaWindow :: enableSetupScreen()
 {
 	[ delegate enableSetupScreen ];
+    bEnableSetupScreen = true;
 }
 
 //------------------------------------------------------------
 void ofxCocoaWindow :: disableSetupScreen()
 {
-	[ delegate disableSetupScreen ];
+    [ delegate disableSetupScreen ];
+    bEnableSetupScreen = false;
 }
