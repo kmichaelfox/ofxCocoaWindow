@@ -182,7 +182,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
         ofColor c = ofGetBackgroundColor();
         glClearColor(c.r/255.,c.g/255.,c.b/255.,c.a/255.);
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        cout << c << endl;
 	}
     
     ofEvents().notifyDraw();
